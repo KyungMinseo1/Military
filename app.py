@@ -7,9 +7,9 @@ app.secret_key = '19756451'
 
 # 파일 불러오기
 with open('data/student_data.pickle', 'rb') as fr:
-    student_data = pickle.load(fr)
+    global_student_data = pickle.load(fr)
 with open('data/military_data.pickle', 'rb') as fr:
-    military_data = pickle.load(fr)
+    global_military_data = pickle.load(fr)
 with open('data/s_list.pickle', 'rb') as fr:
     s_list = pickle.load(fr)
 
@@ -17,7 +17,7 @@ with open('data/s_list.pickle', 'rb') as fr:
 reserve = Reserve(s_list)
 
 # 예비군 데이터 자동 생성
-reserve.init_create(student_data, military_data)
+reserve.init_create(global_student_data, global_military_data)
 
 @app.route('/', methods = ['GET'])
 def home():
@@ -35,9 +35,11 @@ def create():
         student_data = {
             str(s_result['s_num']): list(s_result.values())[1:]
         }
+        global_student_data[str(s_result['s_num'])] = list(s_result.values())[1:]
         military_data = {
             m_result['m_num']: list(m_result.values())[1:]
         }
+        global_military_data[m_result['m_num']] = list(m_result.values())[1:]
         data = reserve.create(student_data, military_data)
         if data:
             return render_template('create.html', results=data)
@@ -62,7 +64,7 @@ def update():
     if request.method == "POST":
         reset = request.form.get("action")
         if reset:
-            return render_template('update.html', results=0, founds=0)
+            return render_template('update.html', results=0, founds=0, error=0)
         form_type = request.form.get("form_type")
         if form_type == "military_update":
             # HTML에서 name="m_num", name="m_name" 등으로 전송된 데이터 처리
@@ -80,7 +82,7 @@ def update():
                     ]
                 update_list.append(entry)
             data = reserve.update_after_train(update_list)
-            return render_template('update.html', results=data, founds=0)
+            return render_template('update.html', results=data, founds=0, error=0)
         
         elif form_type == "student":
             # 학번 리스트로 학생 정보 조회
@@ -88,18 +90,20 @@ def update():
             found_students = []
             
             for s_num in s_nums:
-                if s_num in student_data:
-                    student_info = student_data[s_num]
+                if s_num in global_student_data:
+                    student_info = global_student_data[s_num]
                     # 학번을 포함한 학생 정보 추가 (업데이트 시 학번 식별용)
                     student_with_snum = [s_num] + list(student_info)
                     found_students.append(student_with_snum)
+                else:
+                    return render_template('update.html', results=0, founds=0, error=1)
             
-            return render_template('update.html', results=0, founds=found_students)
+            return render_template('update.html', results=0, founds=found_students, error=0)
         
         elif form_type == "student_update":
             total_str = request.form.get("total")
             if not total_str:
-                return render_template('update.html', results=0, founds=0)
+                return render_template('update.html', results=0, founds=0, error=1)
             
             total = int(total_str)
             update_dict = {}
@@ -129,9 +133,9 @@ def update():
             # 학생 정보 업데이트
             if update_dict:
                 result = reserve.update_is_available(update_dict)
-            return render_template('update.html', results=result, founds=0)  # 성공 메시지 표시
+            return render_template('update.html', results=result, founds=0, error=0)  # 성공 메시지 표시
 
-    return render_template('update.html', results=data, founds=data)
+    return render_template('update.html', results=data, founds=data, error=0)
 
 @app.route('/delete', methods = ['GET', 'POST'])
 def delete():

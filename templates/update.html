@@ -95,6 +95,12 @@
                 </form>
             </div>
 
+            {% if error %}
+                <h4>검색 결과가 없습니다!</h4>
+            {% else %}
+                <p> </p>
+            {% endif %}
+
             {% if results %}
             <h2>업데이트 결과</h2>
                 <table>
@@ -106,6 +112,7 @@
                             <th>예비군 훈련 가능여부</th>
                             <th>예비군 복무연차</th>
                             <th>예비군 훈련 횟수</th>
+                            <th>예비군 훈련 시간</th>
                             <th>훈련 연기 가능 횟수</th>
                             <th>조기 퇴소 횟수</th>
                         </tr>
@@ -121,6 +128,7 @@
                                 <td>{{ result[5] }}</td>
                                 <td>{{ result[6] }}</td>
                                 <td>{{ result[7] }}</td>
+                                <td>{{ result[8] }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
