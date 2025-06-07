@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생성</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+
+<body>
+    <div class ="wrapper">
+        <header>
+            <h1>생성 페이지</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('create') }}">생성</a></li>
+                    <li><a href="{{ url_for('retrieve') }}">검색</a></li>
+                    <li><a href="{{ url_for('update') }}">업데이트</a></li>
+                    <li><a href="{{ url_for('delete') }}">삭제</a></li>
+                    <li><a href="{{ url_for('print') }}">출력</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <h2>새롭게 생성할 데이터를 입력해주세요</h2>
+            <div id="create-form">
+                <form method="POST" action="{{ url_for('create') }}">
+                    <div clsss="create-forms-wrapper">
+                        <div class="create-form-container">
+                            <div class="create-form-grid">
+                                <label for="s_num">학번:</label>
+                                <input type="text" name="s_num" id="s_num" required>
+
+                                <label for="s_name">이름:</label>
+                                <input type="text" name="s_name" id="s_name" required>
+
+                                <label for="s_year">나이:</label>
+                                <input type="text" name="s_year" id="s_year" required>
+
+                                <label for="s_gender">성별:</label>
+                                <select name="s_gender" id="s_gender" required>
+                                    <option value="0">남</option>
+                                    <option value="1">여</option>
+                                </select>
+
+                                <label for="s_exchange">교환학생여부:</label>
+                                <select name="s_exchange" id="s_exchange" required>
+                                    <option value="0">예</option>
+                                    <option value="1">아니오</option>
+                                </select>
+
+                                <label for="s_rest">휴학여부:</label>
+                                <select name="s_rest" id="s_rest" required>
+                                    <option value="0">예</option>
+                                    <option value="1">아니오</option>
+                                </select>
+
+                                <label for="s_train">훈련가능여부:</label>
+                                <select name="s_train" id="s_train" required>
+                                    <option value="1">예</option>
+                                    <option value="0">아니오</option>
+                                </select>
+
+                                <label for="s_semeester">재학 학기:</label>
+                                <input type="text" name="s_semester" id="s_semester" required>
+                            </div>
+                        </div>
+                
+                        <div class="create-form-container">
+                            <div class="create-form-grid">
+                                <label for="m_num">군번:</label>
+                                <input type="text" name="m_num" id="m_num" required>
+                                
+                                <label for="m_type">군종:</label>
+                                <select name="m_type" id="m_type" required>
+                                    <option value="육군">육군</option>
+                                    <option value="해군">해군</option>
+                                    <option value="공군">공군</option>
+                                    <option value="해병대">해병대</option>
+                                    <option value="상근">상근</option>
+                                    <option value="공익">공익</option>
+                                </select>
+                                
+                                <label for="m_class">최종 계급:</label>
+                                <select name="m_class" id="m_class" required>
+                                    <option value="이병">이병</option>
+                                    <option value="일병">일병</option>
+                                    <option value="상병">상병</option>
+                                    <option value="병장">병장</option>
+                                </select>
+                                
+                                <label for="m_unit">부대:</label>
+                                <input type="text" name="m_unit" id="m_unit" required>
+
+                                <label for="m_role">보직:</label>
+                                <input type="text" name="m_role" id="m_role" required>
+
+                                <label for="m_date">전역일:</label>
+                                <input type="date" name="m_date" id="m_date" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="create-btn">생성</button>
+                    </div>
+                </form>
+            </div>
+            
+            {% if results %}
+            <h2>생성 데이터</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>학번</th>
+                            <th>군번</th>
+                            <th>이름</th>
+                            <th>예비군 훈련 가능여부</th>
+                            <th>예비군 복무연차</th>
+                            <th>예비군 훈련 횟수</th>
+                            <th>훈련 연기 가능 횟수</th>
+                            <th>조기 퇴소 횟수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                            <tr>
+                                <td>{{ result[0] }}</td>
+                                <td>{{ result[1] }}</td>
+                                <td>{{ result[2] }}</td>
+                                <td>{{ result[3] }}</td>
+                                <td>{{ result[4] }}</td>
+                                <td>{{ result[5] }}</td>
+                                <td>{{ result[6] }}</td>
+                                <td>{{ result[7] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif results == 0 %}
+                <p> </p>
+            {% else %}
+                <p>생성 데이터를 입력해주세요.</p>
+            {% endif %}
+            <button onclick="goToHomePage()" class="home-btn">홈페이지</button>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Flask 웹 애플리케이션</p>
+        </footer>
+    </div>
+    <script>
+        function goToHomePage() {
+            window.location.href = "{{ url_for('home') }}";
+        }
+    </script>
+</body>

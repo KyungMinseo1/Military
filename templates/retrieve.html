@@ -8,12 +8,13 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </head>
 
-<body>
+<body {% if results %}class="results-active"{% endif %}>
     <div class ="wrapper">
         <header>
             <h1>검색 페이지</h1>
             <nav>
                 <ul>
+                    <li><a href="{{ url_for('create') }}">생성</a></li>
                     <li><a href="{{ url_for('retrieve') }}">검색</a></li>
                     <li><a href="{{ url_for('update') }}">업데이트</a></li>
                     <li><a href="{{ url_for('delete') }}">삭제</a></li>
@@ -23,63 +24,87 @@
         </header>
 
         <main>
-            <h2>검색 방법을 선택해주세요</h2>
-            <form method="POST" action="{{ url_for('retrieve') }}">
-                <label for="search_type">검색 유형:</label>
-                <select name="search_type" id="search_type" onchange="toggleInput()">
-                    <option value="s_info">학생 정보 조회</option>
-                    <option value="filter">예비군 목록 검색</option>
-                </select>
-
-                <label for="search_value">검색 값:</label>
-                <input type="text" name="search_value" id="search_value" required>
-
-                <button type="submit">검색</button>
-            </form>
-            <h2>검색 결과</h2>
             {% if results %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>학번</th>
-                            <th>군번</th>
-                            <th>예비군 훈련 가능여부</th>
-                            <th>예비군 복무연차</th>
-                            <th>예비군 훈련 횟수</th>
-                            <th>훈련 연기 가능 횟수</th>
-                            <th>조기 퇴소 횟수</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in results %}
+                <div class="retrieve-header">
+                    <h2>검색 결과</h2>
+                    <button onclick="resetSearch()" class="reset-btn">재검색</button>
+                </div>
+            {% else %}
+                <h2>검색 방법을 선택해주세요</h2>
+            {% endif %}
+            <div id="search-form">
+                <form method="POST" action="{{ url_for('retrieve') }}">
+                    <div clsss="search-forms-wrapper">
+                        <div class="search-form-container">
+                            <div class="search-form-grid">
+                                <label for="search_type">검색 유형:</label>
+                                <select name="search_type" id="search_type" onchange="toggleInput()">
+                                    <option value="s_info">학생 정보 조회</option>
+                                    <option value="filter">예비군 목록 검색</option>
+                                </select>
+
+                                <label for="search_value">검색 값:</label>
+                                <input type="text" name="search_value" id="search_value" placeholder="학번을 입력하세요" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class = "search-btn">검색</button>
+                </form>
+            </div>
+            
+            {% if results %}
+                <div class="table-container">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>{{ result[0] }}</td>
-                                <td>{{ result[1] }}</td>
-                                <td>{{ result[2] }}</td>
-                                <td>{{ result[3] }}</td>
-                                <td>{{ result[4] }}</td>
-                                <td>{{ result[5] }}</td>
-                                <td>{{ result[6] }}</td>
+                                <th>학번</th>
+                                <th>군번</th>
+                                <th>이름</th>
+                                <th>예비군 훈련 가능여부</th>
+                                <th>예비군 복무연차</th>
+                                <th>예비군 훈련 횟수</th>
+                                <th>훈련 연기 가능 횟수</th>
+                                <th>조기 퇴소 횟수</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                                <tr>
+                                    <td>{{ result[0] }}</td>
+                                    <td>{{ result[1] }}</td>
+                                    <td>{{ result[2] }}</td>
+                                    <td>{{ result[3] }}</td>
+                                    <td>{{ result[4] }}</td>
+                                    <td>{{ result[5] }}</td>
+                                    <td>{{ result[6] }}</td>
+                                    <td>{{ result[7] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% elif results == 0 %}
                 <p> </p>
             {% else %}
-                <p>검색 결과를 입력해주세요.</p>
+                <p>검색어를 입력해주세요.</p>
+                </div>
             {% endif %}
-            <button onclick="goToHomePage()">홈페이지</button>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="goToHomePage()" class="home-btn">홈페이지</button>
+            </div>
         </main>
 
         <footer>
             <p>&copy; 2023 Flask 웹 애플리케이션</p>
         </footer>
     </div>
+    
     <script>
         function goToHomePage() {
             window.location.href = "{{ url_for('home') }}";
         }
+        
         function toggleInput() {
             const searchType = document.getElementById('search_type').value;
             const searchValue = document.getElementById('search_value');
@@ -87,14 +112,22 @@
             if (searchType === 's_info') {
                 searchValue.disabled = false;
                 searchValue.required = true;
+                searchValue.placeholder = "학번을 입력하세요";
             } else {
                 searchValue.value = ''; // 입력된 값 초기화
                 searchValue.disabled = true;
                 searchValue.required = false;
+                searchValue.placeholder = "예비군 목록 전체 조회";
             }
         }
 
         // 페이지 로드 시에도 체크 (새로고침 대비)
         window.onload = toggleInput;
+
+        function resetSearch() {
+            document.body.classList.remove('results-active');
+            window.location.href = "{{ url_for('retrieve') }}";
+        }  
     </script>
 </body>
+</html>

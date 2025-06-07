@@ -1,1 +1,283 @@
-<h1>Hello World!</h1>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업데이트</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+
+<body {% if results or founds %}class="results-active"{% endif %}>
+    <div class ="wrapper">
+        <header>
+            <h1>업데이트 페이지</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('create') }}">생성</a></li>
+                    <li><a href="{{ url_for('retrieve') }}">검색</a></li>
+                    <li><a href="{{ url_for('update') }}">업데이트</a></li>
+                    <li><a href="{{ url_for('delete') }}">삭제</a></li>
+                    <li><a href="{{ url_for('print') }}">출력</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <h2>업데이트 유형을 선택해주세요</h2>
+            <div class="update-header">
+                <label for="update_type">업데이트 유형:</label>
+                <select name="update_type" id="update_type" onchange="handleUpdateTypeChange()">
+                    <option value="military">예비군 수료 정보</option>
+                    <option value="student">학생정보 수정</option>
+                </select>
+                <form method="POST" action="{{ url_for('update') }}">
+                    <button type="submit" onclick="resetPage(this)" ame="action" value="0">초기화</button>
+                </form>
+            </div>
+
+            <div id="military-form">
+                <!-- 예비군 정보 수정 폼 -->
+                <form method="POST" action="{{ url_for('update') }}">
+                    <input type="hidden" name="form_type" value="military_update">
+                    
+                    <div id="military-forms-wrapper">
+                        <div class="military-form-container">
+                            <div class="military-form">
+                                <label for="s_num">학번:</label>
+                                <input type="text" name="s_num" id="s_num" required>
+                                
+                                <label for="m_train">예비군 훈련 여부:</label>
+                                <select name="m_train" id="m_train" required>
+                                    <option value="1">예</option>
+                                    <option value="0">아니오</option>
+                                </select>
+                                
+                                <label for="m_time">훈련 시간:</label>
+                                <input type="text" name="m_time" id="m_time" required>
+                                
+                                <label for="m_delay">훈련 연기 여부:</label>
+                                <select name="m_delay" id="m_delay" required>
+                                    <option value="1">예</option>
+                                    <option value="0">아니오</option>
+                                </select>
+                                
+                                <label for="m_leave">조기퇴소 여부:</label>
+                                <select name="m_leave" id="m_leave" required>
+                                    <option value="1">예</option>
+                                    <option value="0">아니오</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="addMilitaryForm()">+ 행 추가</button>
+                    <button type="submit">예비군 정보 업데이트</button>
+                </form>
+            </div>
+
+            <div id="student-form" hidden>
+                <!-- 학생 정보 수정 폼 -->
+                <form method="POST" action="{{ url_for('update') }}">
+                    <input type="hidden" name="form_type" value="student">
+                    <label>수정하고자 하는 학생의 학번을 입력해주세요:</label>
+                    <p> </p>
+                    <div id="student-forms-wrapper">
+                        <div class="student-form-container">
+                            <div class="student-form">
+                                <label for="s_num[]">학번:</label>
+                                <input type="text" name="s_num[]" id="s_num" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addStudentSnum()">+ 학번 추가</button>
+                    <button type="submit">제출</button>
+                </form>
+            </div>
+
+            {% if results %}
+            <h2>업데이트 결과</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>학번</th>
+                            <th>군번</th>
+                            <th>이름</th>
+                            <th>예비군 훈련 가능여부</th>
+                            <th>예비군 복무연차</th>
+                            <th>예비군 훈련 횟수</th>
+                            <th>훈련 연기 가능 횟수</th>
+                            <th>조기 퇴소 횟수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                            <tr>
+                                <td>{{ result[0] }}</td>
+                                <td>{{ result[1] }}</td>
+                                <td>{{ result[2] }}</td>
+                                <td>{{ result[3] }}</td>
+                                <td>{{ result[4] }}</td>
+                                <td>{{ result[5] }}</td>
+                                <td>{{ result[6] }}</td>
+                                <td>{{ result[7] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p> </p>
+            {% endif %}
+
+            {% if founds %}
+            <h2>정보 수정</h2>
+                <form method="POST" action="{{ url_for('update') }}">
+                    <input type="hidden" name="form_type" value="student_update">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>학번</th>
+                                <th>이름</th>
+                                <th>나이</th>
+                                <th>성별</th>
+                                <th>교환학생여부</th>
+                                <th>휴학여부</th>
+                                <th>훈련가능여부</th>
+                                <th>재학학기</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for found in founds %}
+                                <tr>
+                                    <!-- 모든 데이터를 hidden field로 전달 -->
+                                    <input type="hidden" name="s_num_{{ loop.index0 }}" value="{{ found[0] }}">
+                                    <input type="hidden" name="name_{{ loop.index0 }}" value="{{ found[1] }}">
+                                    <input type="hidden" name="age_{{ loop.index0 }}" value="{{ found[2] }}">
+                                    <input type="hidden" name="gender_{{ loop.index0 }}" value="{{ found[3] }}">
+                                    <input type="hidden" name="semester_{{ loop.index0 }}" value="{{ found[7] }}">
+                                    
+                                    <td>{{ found[0] }}</td>
+                                    <td>{{ found[1] }}</td>
+                                    <td>{{ found[2] }}</td>
+                                    <td>{{ found[3] }}</td>
+                                    <td>
+                                        <select name="exchange_{{ loop.index0 }}">
+                                            <option value="0" {% if found[4] == 0 %}selected{% endif %}>예</option>
+                                            <option value="1" {% if found[4] == 1 %}selected{% endif %}>아니오</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="rest_{{ loop.index0 }}">
+                                            <option value="0" {% if found[5] == 0 %}selected{% endif %}>예</option>
+                                            <option value="1" {% if found[5] == 1 %}selected{% endif %}>아니오</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="train_{{ loop.index0 }}">
+                                            <option value="1" {% if found[6] == 1 %}selected{% endif %}>예</option>
+                                            <option value="0" {% if found[6] == 0 %}selected{% endif %}>아니오</option>
+                                        </select>
+                                    </td>
+                                    <td>{{ found[7] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="total" value="{{ founds|length }}">
+                    <button type="submit">수정 내용 저장</button>
+                </form>
+            {% else %}
+                <p> </p>
+            {% endif %}
+
+            <button onclick="goToHomePage()" class="home-btn">홈페이지</button>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Flask 웹 애플리케이션</p>
+        </footer>
+    </div>
+    <script>
+        function goToHomePage() {
+            window.location.href = "{{ url_for('home') }}";
+        }
+
+        function handleUpdateTypeChange() {
+            const selected = document.getElementById('update_type').value;
+            document.getElementById('student-form').style.display = selected === 'student' ? 'block' : 'none';
+            document.getElementById('military-form').style.display = selected === 'military' ? 'block' : 'none';
+        }
+
+        let formIndex = 0;
+
+        function addMilitaryForm() {
+            const container = document.getElementById('military-forms-wrapper');
+            const formCount = container.children.length + 1;
+            
+            const html = `
+                <div class="military-form-container">
+                    <button type="button" onclick="removeMilitaryForm(this)" class="delete-btn">삭제</button>
+                    <div class="military-form">
+                        <label for="s_num_${formCount}">학번:</label>
+                        <input type="text" name="s_num" id="s_num_${formCount}" required>
+                        
+                        <label for="m_train_${formCount}">예비군 훈련 여부:</label>
+                        <select name="m_train" id="m_train_${formCount}" required>
+                            <option value="1">예</option>
+                            <option value="0">아니오</option>
+                        </select>
+                        
+                        <label for="m_time_${formCount}">훈련 시간:</label>
+                        <input type="text" name="m_time" id="m_time_${formCount}" required>
+                        
+                        <label for="m_delay_${formCount}">훈련 연기 여부:</label>
+                        <select name="m_delay" id="m_delay_${formCount}" required>
+                            <option value="1">예</option>
+                            <option value="0">아니오</option>
+                        </select>
+                        
+                        <label for="m_leave_${formCount}">조기퇴소 여부:</label>
+                        <select name="m_leave" id="m_leave_${formCount}" required>
+                            <option value="1">예</option>
+                            <option value="0">아니오</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeMilitaryForm(button) {
+            if (confirm('이 예비군 정보를 삭제하시겠습니까?')) {
+                button.closest('.military-form-container').remove();
+            }
+        }
+
+        function addStudentSnum() {
+            const container = document.getElementById('student-forms-wrapper');
+            const inputHTML = `
+                <div class="student-form-container">
+                    <button type="button" onclick="removeStudentForm(this)" class="delete-btn">삭제</button>
+                    <div class="student-form">
+                        <label for="s_num[]">학번:</label>
+                        <input type="text" name="s_num[]" id="s_num" required>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', inputHTML);
+        }
+
+        function removeStudentForm(button) {
+            if (confirm('이 학번을 삭제하시겠습니까?')) {
+                button.closest('.student-form-container').remove();
+            }
+        }
+
+        function resetPage(button) {
+            if (confirm('초기화 하시겠습니까?')) {
+                button.closest('form').submit();
+            }
+        }
+    </script>
+</body>
