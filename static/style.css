@@ -15,48 +15,112 @@ body {
 
 /* 헤더 스타일 */
 header {
-    background-color: #0c2e61;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: white;
-    padding: 20px;
+    padding: 30px 20px;
     text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    /* overflow: hidden; 일시적으로 주석처리 */
+    z-index: 1; /* 추가 */
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: float 20s linear infinite;
+    pointer-events: none;
 }
 
 header h1 {
-    margin: 20px;
-    font-size: 2.5rem;
+    margin: 0 0 30px 0;
+    font-size: 2.8rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 2; /* 추가 */
+}
+
+header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    border-radius: 2px;
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.4);
 }
 
 /* 네비게이션 메뉴 */
+nav {
+    position: relative;
+    z-index: 2; /* 추가 */
+}
+
 nav ul {
     list-style: none;
     padding: 0;
-    margin-top: 50px;
+    margin: 0;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    gap: 15px;
 }
 
 nav ul li {
-    margin: 0 10px;
+    margin: 0;
 }
 
 nav ul li a {
     text-decoration: none;
     color: white;
-    font-weight: bold;
-    padding: 8px 16px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 12px 24px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    display: inline-block; /* 추가 */
 }
 
+/* 호버 효과 */
 nav ul li a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* 클릭 효과 */
+nav ul li a:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 현재 페이지 표시 */
+nav ul li a.active {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-color: #4CAF50;
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
 }
 
 /* 메인 컨텐츠 */
 main {
     padding: 40px 20px;
-    max-width: 800px;
+    max-width: 1500px;
     margin: 0 auto;
     text-align: center;
     flex: 1;
@@ -75,7 +139,8 @@ form {
 }
 
 /* 업데이트 타입 선택 영역 */
-.update-header {
+.update-header,
+.delete-header {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -92,7 +157,8 @@ form {
    margin: 0;
 }
 
-#update_type {
+#update_type,
+#delete_type {
     width: 200px;
     padding: 8px 12px;
     border: 1px solid #ddd;
@@ -105,7 +171,8 @@ form {
 #military-form,
 #student-form,
 #search-form,
-#create-form {
+#create-form,
+#auto-form {
     margin-top: 20px;
     padding: 20px;
     border: 1px solid #ddd;
@@ -149,6 +216,22 @@ form {
     border-radius: 8px;
     background-color: #fafafa;
     max-width: 100%;
+}
+
+.auto-form {
+    text-align: left;
+    gap: 15px 20px;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background-color: #fafafa;
+    max-width: 100%;
+}
+
+.auto-form h4 {
+    text-align: center;
 }
 
 /* 라벨 스타일 */
@@ -196,7 +279,8 @@ form {
 .military-form-container, 
 .student-form-container,
 .search-form-container,
-.create-form-container {
+.create-form-container,
+.auto-form-container {
     position: relative;
     margin-bottom: 10px;
     padding: 10px;
@@ -233,7 +317,8 @@ form {
 /* 결과 생성 시 폼 숨기기 */
 .results-active #military-form,
 .results-active #student-form,
-.results-active #search-form {
+.results-active #search-form,
+.results-active #auto-form {
     display: none;
 }
 
@@ -245,7 +330,8 @@ table {
 }
 
 .table-container {
-    max-height: 400px;  /* 원하는 높이 설정 */
+    width: 100%;
+    max-height: 650px;  /* 원하는 높이 설정 */
     overflow-y: auto;
     margin-top: 20px;
 }
@@ -448,6 +534,17 @@ footer {
    cursor: pointer;
 }
 
+.reset2-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #0d6efd;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
 /* 홈페이지 버튼 */
 .home-btn {
     background: linear-gradient(135deg, #28a745, #20c997);
@@ -486,4 +583,40 @@ footer {
         padding: 20px;
         margin: 10px;
     }
+}
+
+/* 정렬 가능 테이블*/
+th:hover {
+    background-color: #e9ecef;
+}
+
+th.sortable::after {
+    content: ' ↕';
+    color: #999;
+    font-size: 12px;
+}
+
+th.sort-asc::after {
+    content: ' ↑';
+    color: #007bff;
+}
+
+th.sort-desc::after {
+    content: ' ↓';
+    color: #007bff;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+    background-color: #e3f2fd;
+}
+
+.sort-info {
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 12px;
+    text-align: center;
 }

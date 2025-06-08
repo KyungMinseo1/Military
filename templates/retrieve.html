@@ -11,7 +11,7 @@
 <body {% if results %}class="results-active"{% endif %}>
     <div class ="wrapper">
         <header>
-            <h1>검색 페이지</h1>
+            <h1>예비군 데이터 관리 프로그램</h1>
             <nav>
                 <ul>
                     <li><a href="{{ url_for('create') }}">생성</a></li>
@@ -88,8 +88,7 @@
             {% elif results == 0 %}
                 <p> </p>
             {% else %}
-                <p>검색어를 입력해주세요.</p>
-                </div>
+                <p>검색어를 다시 입력해주세요.</p>
             {% endif %}
             
             <div style="text-align: center; margin-top: 20px;">

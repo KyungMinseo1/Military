@@ -11,7 +11,7 @@
 <body {% if results or founds %}class="results-active"{% endif %}>
     <div class ="wrapper">
         <header>
-            <h1>업데이트 페이지</h1>
+            <h1>예비군 데이터 관리 프로그램</h1>
             <nav>
                 <ul>
                     <li><a href="{{ url_for('create') }}">생성</a></li>
@@ -32,7 +32,7 @@
                     <option value="student">학생정보 수정</option>
                 </select>
                 <form method="POST" action="{{ url_for('update') }}">
-                    <button type="submit" onclick="resetPage(this)" ame="action" value="0">초기화</button>
+                    <button type="submit" class="reset2-btn" onclick="resetPage(this)" name="action" value="0">초기화</button>
                 </form>
             </div>
 

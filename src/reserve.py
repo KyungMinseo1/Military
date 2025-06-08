@@ -62,7 +62,7 @@ class Reserve:
             out_date = m_data[4]                    # 전역일 데이터 추출
             out_year = int(out_date.split('-')[0])  # 전역년도 추출
             current_year = datetime.today().year    # 현재년도 추출
-            reserve_year = current_year - (out_year + 1)  # 예비군 복무연차 계산 (현재년도 - (전역년도 + 1))
+            reserve_year = current_year - out_year  # 예비군 복무연차 계산 (현재년도 - 전역년도)
             temp_data.append(reserve_year)          # 예비군 복무연차 추가
 
             temp_data.append(0)                     # 예비군 훈련 횟수(처음 생성 시 0으로 초기화)
@@ -96,7 +96,7 @@ class Reserve:
         out_date = m_data[4]                    # 전역일 데이터 추출
         out_year = int(out_date.split('-')[0])  # 전역년도 추출
         current_year = datetime.today().year    # 현재년도 추출
-        reserve_year = current_year - (out_year + 1)  # 예비군 복무연차 계산 (현재년도 - (전역년도 + 1))
+        reserve_year = current_year - out_year  # 예비군 복무연차 계산 (현재년도 - 전역년도)
         temp_data.append(reserve_year)          # 예비군 복무연차 추가
 
         temp_data.append(0)                     # 예비군 훈련 횟수(처음 생성 시 0으로 초기화)
@@ -130,7 +130,7 @@ class Reserve:
             result = self.binary_search(s_num, 0, len(self.data)-1) # 학번 검색을 이진탐색으로 검색
             if result:                          # 탐색 값이 존재한다면
                 _, data = result                # 탐색된 데이터 추출
-            found_data.append(data)             # 탐색된 데이터를 검색 리스트에 추가
+                found_data.append(data)         # 탐색된 데이터를 검색 리스트에 추가
         return found_data                       # 검색리스트 반환
     
     def update_after_train(self, update_list: list) -> Optional[List]:
@@ -173,3 +173,46 @@ class Reserve:
             self.data[idx] = data               # 기존 데이터에 수정된 데이터 업데이트
             return_data.append(data)            # 확인용 리스트에도 수정 데이터 추가
         return return_data                      # 업데이트 확인용 리스트 반환
+    
+    def delete_auto(self, student_data: dict) -> Optional[List]:
+        """
+        조건에 따라 예비군 정보를 자동 삭제하는 함수\n\n
+        삭제 조건:\n
+        - 학생정보에 학번이 없음 (졸업/수료/자퇴)\n
+        - 학기가 9 이상 (추가학기)\n
+        - 예비군 연차가 5년 이상
+        """
+        deleted = []                            # 삭제 데이터 확인용 리스트
+        for entry in self.data[:]:              # 복사본으로 순회하면서 원본 리스트에서 삭제
+            student_id = entry[0]               # 학번 추출
+            reserve_year = entry[4]             # 복무연차 추출
+            semester = student_data[student_id][6]  # 재학학기 추출
+
+            if student_id not in student_data:  # 조건 1: 학번이 student_data에 없음
+                self.data.remove(entry)         # 데이터에서 삭제
+                deleted.append(entry)           # 삭제한 데이터를 확인용 리스트에 추가
+                continue
+            if semester >= 9:                   # 조건 2: 재학학기가 9 이상
+                self.data.remove(entry)         # 데이터에서 삭제
+                deleted.append(entry)           # 삭제한 데이터를 확인용 리스트에 추가
+                continue
+            if reserve_year >= 5:               # 조건 3: 예비군 연차가 5 이상
+                self.data.remove(entry)         # 데이터에서 삭제
+                deleted.append(entry)           # 삭제한 데이터를 확인용 리스트에 추가
+                continue
+        return deleted                          # 확인용 리스트 반환
+    
+    def delete_manual(self, student_ids: list) -> Optional[List]:
+        """
+        사용자가 직접 지정한 학번 목록에 대해 예비군 데이터를 수동 삭제하는 함수
+        """
+        deleted = []                            # 삭제 데이터 확인용 리스트
+        for s_num in student_ids:               # 삭제 대상 학번 모두 순회
+            result = self.binary_search(s_num, 0, len(self.data) - 1)   # 이진 탐색으로 학번 검색
+            if result:                          # 이진 탐색 결과값이 있다면
+                idx, data = result              # 데이터, 인덱스 반환
+                del self.data[idx]              # 데이터에서 삭제
+                deleted.append(data)            # 삭제한 데이터를 확인용 리스트에 추가
+            else:
+                continue                        # 이진 탐색 결과값이 없다면 pass
+        return deleted                          # 확인용 리스트 반환

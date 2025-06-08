@@ -1,1 +1,165 @@
-<h1>Hello World!</h1>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>삭제</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+
+<body {% if results %}class="results-active"{% endif %}>
+    <div class ="wrapper">
+        <header>
+            <h1>예비군 데이터 관리 프로그램</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('create') }}">생성</a></li>
+                    <li><a href="{{ url_for('retrieve') }}">검색</a></li>
+                    <li><a href="{{ url_for('update') }}">업데이트</a></li>
+                    <li><a href="{{ url_for('delete') }}">삭제</a></li>
+                    <li><a href="{{ url_for('print') }}">출력</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <h2>삭제 유형을 선택해주세요</h2>
+            <div class="delete-header">
+                <label for="delete_type">삭제 유형:</label>
+                <select name="delete_type" id="delete_type" onchange="handleDeleteTypeChange()">
+                    <option value="auto">자동 삭제</option>
+                    <option value="manual">수동 삭제</option>
+                </select>
+                <form method="POST" action="{{ url_for('delete') }}">
+                    <button type="submit" class="reset2-btn" onclick="resetPage(this)" name="action" value="0">초기화</button>
+                </form>
+            </div>
+
+            <div id="auto-form">
+                <!-- 예비군 정보 수정 폼 -->
+                <form method="POST" action="{{ url_for('delete') }}">
+                    <input type="hidden" name="form_type" value="auto_delete">
+                    
+                    <div id="auto-forms-wrapper">
+                        <div class="auto-form-container">
+                            <div class="auto-form">
+                                <h4>삭제 대상 데이터</h4>
+                                <p>- 학생정보에 학번이 없음 (졸업/수료/자퇴)</p>
+                                <p>- 학기가 9 이상 (추가학기)</p>
+                                <p>- 예비군 연차가 5년 이상</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit">자동 삭제 진행</button>
+                </form>
+            </div>
+
+            <div id="student-form" hidden>
+                <!-- 학생 정보 수정 폼 -->
+                <form method="POST" action="{{ url_for('delete') }}">
+                    <input type="hidden" name="form_type" value="student">
+                    <label>수정하고자 하는 학생의 학번을 입력해주세요:</label>
+                    <p> </p>
+                    <div id="student-forms-wrapper">
+                        <div class="student-form-container">
+                            <div class="student-form">
+                                <label for="s_num[]">학번:</label>
+                                <input type="text" name="s_num[]" id="s_num" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addStudentSnum()">+ 학번 추가</button>
+                    <button type="submit">제출</button>
+                </form>
+            </div>
+
+            {% if error %}
+                <h4>삭제된 데이터가 없습니다!</h4>
+            {% else %}
+                <p> </p>
+            {% endif %}
+
+            {% if results %}
+            <h2>삭제된 데이터</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>학번</th>
+                            <th>군번</th>
+                            <th>이름</th>
+                            <th>예비군 훈련 가능여부</th>
+                            <th>예비군 복무연차</th>
+                            <th>예비군 훈련 횟수</th>
+                            <th>예비군 훈련 시간</th>
+                            <th>훈련 연기 가능 횟수</th>
+                            <th>조기 퇴소 횟수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                            <tr>
+                                <td>{{ result[0] }}</td>
+                                <td>{{ result[1] }}</td>
+                                <td>{{ result[2] }}</td>
+                                <td>{{ result[3] }}</td>
+                                <td>{{ result[4] }}</td>
+                                <td>{{ result[5] }}</td>
+                                <td>{{ result[6] }}</td>
+                                <td>{{ result[7] }}</td>
+                                <td>{{ result[8] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p> </p>
+            {% endif %}
+
+            <button onclick="goToHomePage()" class="home-btn">홈페이지</button>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Flask 웹 애플리케이션</p>
+        </footer>
+    </div>
+    <script>
+        function goToHomePage() {
+            window.location.href = "{{ url_for('home') }}";
+        }
+
+        function handleDeleteTypeChange() {
+            const selected = document.getElementById('delete_type').value;
+            document.getElementById('student-form').style.display = selected === 'manual' ? 'block' : 'none';
+            document.getElementById('auto-form').style.display = selected === 'auto' ? 'block' : 'none';
+        }
+
+        let formIndex = 0;
+
+        function addStudentSnum() {
+            const container = document.getElementById('student-forms-wrapper');
+            const inputHTML = `
+                <div class="student-form-container">
+                    <button type="button" onclick="removeStudentForm(this)" class="delete-btn">삭제</button>
+                    <div class="student-form">
+                        <label for="s_num[]">학번:</label>
+                        <input type="text" name="s_num[]" id="s_num" required>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', inputHTML);
+        }
+
+        function removeStudentForm(button) {
+            if (confirm('이 학번을 삭제하시겠습니까?')) {
+                button.closest('.student-form-container').remove();
+            }
+        }
+
+        function resetPage(button) {
+            if (confirm('초기화 하시겠습니까?')) {
+                button.closest('form').submit();
+            }
+        }
+    </script>
+</body>

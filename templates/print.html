@@ -1,1 +1,151 @@
-<h1>Hello World!</h1>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출력</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+
+<body {% if results %}class="results-active"{% endif %}>
+    <div class ="wrapper">
+        <header>
+            <h1>예비군 데이터 관리 프로그램</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('create') }}">생성</a></li>
+                    <li><a href="{{ url_for('retrieve') }}">검색</a></li>
+                    <li><a href="{{ url_for('update') }}">업데이트</a></li>
+                    <li><a href="{{ url_for('delete') }}">삭제</a></li>
+                    <li><a href="{{ url_for('print') }}">출력</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            {% if results %}
+                <h2>출력 결과</h2>
+            {% else %}
+                <p> </p>
+            {% endif %}
+            
+            {% if results %}
+                <div class="table-container">
+                    <table id="sortableTable">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-type="number">학번</th>
+                                <th class="sortable" data-type="number">군번</th>
+                                <th class="sortable" data-type="text">이름</th>
+                                <th class="sortable" data-type="number">예비군 훈련 가능여부</th>
+                                <th class="sortable" data-type="number">예비군 복무연차</th>
+                                <th class="sortable" data-type="number">예비군 훈련 횟수</th>
+                                <th class="sortable" data-type="number">예비군 훈련 시간</th>
+                                <th class="sortable" data-type="number">훈련 연기 가능 횟수</th>
+                                <th class="sortable" data-type="number">조기 퇴소 횟수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                                <tr>
+                                    <td>{{ result[0] }}</td>
+                                    <td>{{ result[1] }}</td>
+                                    <td>{{ result[2] }}</td>
+                                    <td>{{ result[3] }}</td>
+                                    <td>{{ result[4] }}</td>
+                                    <td>{{ result[5] }}</td>
+                                    <td>{{ result[6] }}</td>
+                                    <td>{{ result[7] }}</td>
+                                    <td>{{ result[8] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>                
+            {% else %}
+                <p>데이터가 없습니다!</p>
+            {% endif %}
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="goToHomePage()" class="home-btn">홈페이지</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Flask 웹 애플리케이션</p>
+        </footer>
+    </div>
+    
+    <script>
+        function goToHomePage() {
+            window.location.href = "{{ url_for('home') }}";
+        }
+
+        class SortableTable {
+            constructor(tableId) {
+                this.table = document.getElementById(tableId);
+                this.headers = this.table.querySelectorAll('th.sortable');
+                this.tbody = this.table.querySelector('tbody');
+                this.currentSort = { column: -1, direction: 'asc' };
+                
+                this.init();
+            }
+            
+            init() {
+                this.headers.forEach((header, index) => {
+                    header.addEventListener('click', () => this.sortTable(index, header));
+                });
+            }
+            
+            sortTable(columnIndex, header) {
+                const dataType = header.getAttribute('data-type');
+                const rows = Array.from(this.tbody.querySelectorAll('tr'));
+                
+                // 정렬 방향 결정
+                let direction = 'asc';
+                if (this.currentSort.column === columnIndex && this.currentSort.direction === 'asc') {
+                    direction = 'desc';
+                }
+                
+                // 기존 정렬 표시 제거
+                this.headers.forEach(h => {
+                    h.classList.remove('sort-asc', 'sort-desc');
+                });
+                
+                // 새로운 정렬 표시 추가
+                header.classList.add(direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                
+                // 행 정렬
+                rows.sort((a, b) => {
+                    const aValue = a.cells[columnIndex].textContent.trim();
+                    const bValue = b.cells[columnIndex].textContent.trim();
+                    
+                    let comparison = 0;
+                    
+                    if (dataType === 'number') {
+                        const aNum = parseFloat(aValue) || 0;
+                        const bNum = parseFloat(bValue) || 0;
+                        comparison = aNum - bNum;
+                    } else {
+                        comparison = aValue.localeCompare(bValue, 'ko');
+                    }
+                    
+                    return direction === 'asc' ? comparison : -comparison;
+                });
+                
+                // 정렬된 행들을 테이블에 다시 추가
+                rows.forEach(row => this.tbody.appendChild(row));
+                
+                // 현재 정렬 상태 저장
+                this.currentSort = { column: columnIndex, direction };
+            }
+        }
+        
+        // 테이블 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            new SortableTable('sortableTable');
+        });
+    </script>
+</body>
+</html>

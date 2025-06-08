@@ -139,11 +139,33 @@ def update():
 
 @app.route('/delete', methods = ['GET', 'POST'])
 def delete():
-    return render_template('delete.html')
+    data = None
+    if request.method == "POST":
+        reset = request.form.get("action")
+        if reset:
+            return render_template('delete.html', results=0, error=0)
+        form_type = request.form.get("form_type")
+        if form_type == "auto_delete":
+            data = reserve.delete_auto(global_student_data)
+            if data == []:
+                return render_template('delete.html', results=0, error=1)
+            else:
+                return render_template('delete.html', results=data, error=0)
+        
+        elif form_type == "student":
+            # 학번 리스트로 학생 정보 조회
+            s_nums = request.form.getlist("s_num[]")
+            data = reserve.delete_manual(s_nums)
+            if data == []:
+                return render_template('delete.html', results=0, error=1)
+            else:
+                return render_template('delete.html', results=data, error=0)
+    return render_template('delete.html', results=data, error=0)
 
 @app.route('/print', methods = ['GET', 'POST'])
 def print():
-    return render_template('print.html')
+    data = reserve.data
+    return render_template('print.html', results=data)
 
 if __name__ == "__main__":
     app.run(debug=True)
