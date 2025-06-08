@@ -12,7 +12,6 @@ with open('data/military_data.pickle', 'rb') as fr:
     global_military_data = pickle.load(fr)
 with open('data/s_list.pickle', 'rb') as fr:
     s_list = pickle.load(fr)
-
 # 예비군 클래스 불러오기
 reserve = Reserve(s_list)
 
@@ -55,8 +54,11 @@ def retrieve():
             data = reserve.retrieve(search_value, is_filter=False)
         elif retrieve_type == "filter":
             data = reserve.retrieve(is_filter=True)
-        return render_template('retrieve.html', results=data)
-    return render_template('retrieve.html', results=data)
+        elif retrieve_type == "early":
+            data = reserve.retrieve(is_early=True)
+            return render_template('retrieve.html', results=data, extend=1)
+        return render_template('retrieve.html', results=data, extend=0)
+    return render_template('retrieve.html', results=data, extend=0)
 
 @app.route('/update', methods = ['GET', 'POST'])
 def update():
@@ -64,7 +66,7 @@ def update():
     if request.method == "POST":
         reset = request.form.get("action")
         if reset:
-            return render_template('update.html', results=0, founds=0, error=0)
+            return render_template('update.html', results=0, founds=0, error=0, warnings=None, non_updates=None)
         form_type = request.form.get("form_type")
         if form_type == "military_update":
             # HTML에서 name="m_num", name="m_name" 등으로 전송된 데이터 처리
@@ -81,8 +83,22 @@ def update():
                     s_nums[i], int(m_trains[i]), int(m_times[i]), int(m_delays[i]), int(m_leaves[i])
                     ]
                 update_list.append(entry)
-            data = reserve.update_after_train(update_list)
-            return render_template('update.html', results=data, founds=0, error=0)
+            result = reserve.update_after_train(update_list)
+            data = []
+            warning = []
+            non_update = []
+            if result:
+                for d in result:
+                    if len(d) == 9:
+                        data.append(d)
+                    elif len(d) == 10 and d[-1] == 1:
+                        data.append(d)
+                        warning.append(d)
+                    elif len(d) == 10 and d[-1] == 0:
+                        data.append(d)
+                        non_update.append(d)
+            return render_template('update.html', results=data, founds=0,
+                                   error=0, warnings=warning, non_updates=non_update)
         
         elif form_type == "student":
             # 학번 리스트로 학생 정보 조회
@@ -163,7 +179,7 @@ def delete():
     return render_template('delete.html', results=data, error=0)
 
 @app.route('/print', methods = ['GET', 'POST'])
-def print():
+def print_():
     data = reserve.data
     return render_template('print.html', results=data)
 

@@ -18,7 +18,7 @@
                     <li><a href="{{ url_for('retrieve') }}">검색</a></li>
                     <li><a href="{{ url_for('update') }}">업데이트</a></li>
                     <li><a href="{{ url_for('delete') }}">삭제</a></li>
-                    <li><a href="{{ url_for('print') }}">출력</a></li>
+                    <li><a href="{{ url_for('print_') }}">출력</a></li>
                 </ul>
             </nav>
         </header>
@@ -41,6 +41,7 @@
                                 <select name="search_type" id="search_type" onchange="toggleInput()">
                                     <option value="s_info">학생 정보 조회</option>
                                     <option value="filter">예비군 목록 검색</option>
+                                    <option value="early">조기퇴소 인원 검색</option>
                                 </select>
 
                                 <label for="search_value">검색 값:</label>
@@ -53,42 +54,79 @@
             </div>
             
             {% if results %}
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>학번</th>
-                                <th>군번</th>
-                                <th>이름</th>
-                                <th>예비군 훈련 가능여부</th>
-                                <th>예비군 복무연차</th>
-                                <th>예비군 훈련 횟수</th>
-                                <th>예비군 훈련 시간</th>
-                                <th>훈련 연기 가능 횟수</th>
-                                <th>조기 퇴소 횟수</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in results %}
+                {% if extend %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td>{{ result[0] }}</td>
-                                    <td>{{ result[1] }}</td>
-                                    <td>{{ result[2] }}</td>
-                                    <td>{{ result[3] }}</td>
-                                    <td>{{ result[4] }}</td>
-                                    <td>{{ result[5] }}</td>
-                                    <td>{{ result[6] }}</td>
-                                    <td>{{ result[7] }}</td>
-                                    <td>{{ result[8] }}</td>
+                                    <th>학번</th>
+                                    <th>군번</th>
+                                    <th>이름</th>
+                                    <th>예비군 훈련 가능여부</th>
+                                    <th>예비군 복무연차</th>
+                                    <th>예비군 훈련 횟수</th>
+                                    <th>예비군 훈련 시간</th>
+                                    <th>훈련 연기 가능 횟수</th>
+                                    <th>조기 퇴소 횟수</th>
+                                    <th>누락 훈련 시간</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                    <tr>
+                                        <td>{{ result[0] }}</td>
+                                        <td>{{ result[1] }}</td>
+                                        <td>{{ result[2] }}</td>
+                                        <td>{{ result[3] }}</td>
+                                        <td>{{ result[4] }}</td>
+                                        <td>{{ result[5] }}</td>
+                                        <td>{{ result[6] }}</td>
+                                        <td>{{ result[7] }}</td>
+                                        <td>{{ result[8] }}</td>
+                                        <td>{{ result[9] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>학번</th>
+                                    <th>군번</th>
+                                    <th>이름</th>
+                                    <th>예비군 훈련 가능여부</th>
+                                    <th>예비군 복무연차</th>
+                                    <th>예비군 훈련 횟수</th>
+                                    <th>예비군 훈련 시간</th>
+                                    <th>훈련 연기 가능 횟수</th>
+                                    <th>조기 퇴소 횟수</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                    <tr>
+                                        <td>{{ result[0] }}</td>
+                                        <td>{{ result[1] }}</td>
+                                        <td>{{ result[2] }}</td>
+                                        <td>{{ result[3] }}</td>
+                                        <td>{{ result[4] }}</td>
+                                        <td>{{ result[5] }}</td>
+                                        <td>{{ result[6] }}</td>
+                                        <td>{{ result[7] }}</td>
+                                        <td>{{ result[8] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             {% elif results == 0 %}
                 <p> </p>
             {% else %}
-                <p>검색어를 다시 입력해주세요.</p>
+                <p>검색결과가 없습니다. 검색어를 다시 입력해주세요.</p>
             {% endif %}
             
             <div style="text-align: center; margin-top: 20px;">
@@ -114,11 +152,17 @@
                 searchValue.disabled = false;
                 searchValue.required = true;
                 searchValue.placeholder = "학번을 입력하세요";
-            } else {
+            } else if (searchType === 'filter') {
                 searchValue.value = ''; // 입력된 값 초기화
                 searchValue.disabled = true;
                 searchValue.required = false;
                 searchValue.placeholder = "예비군 목록 전체 조회";
+            }
+            else if (searchType === 'early') {
+                searchValue.value = ''; // 입력된 값 초기화
+                searchValue.disabled = true;
+                searchValue.required = false;
+                searchValue.placeholder = "조기 퇴소 인원 전체 조회";
             }
         }
 

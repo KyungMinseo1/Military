@@ -18,7 +18,7 @@
                     <li><a href="{{ url_for('retrieve') }}">검색</a></li>
                     <li><a href="{{ url_for('update') }}">업데이트</a></li>
                     <li><a href="{{ url_for('delete') }}">삭제</a></li>
-                    <li><a href="{{ url_for('print') }}">출력</a></li>
+                    <li><a href="{{ url_for('print_') }}">출력</a></li>
                 </ul>
             </nav>
         </header>
@@ -99,6 +99,26 @@
                 <h4>검색 결과가 없습니다!</h4>
             {% else %}
                 <p> </p>
+            {% endif %}
+
+            {% if warnings %}
+                <div class="section">
+                    <h3>⚠️ 주의 대상</h3>
+                    {% for warning in warnings %}
+                        <div class="warning">{{ warning[0] }}</div>
+                    {% endfor %}
+                    <p class="message">※ 훈련 연기 가능 횟수가 0번 남았습니다!</p>
+                </div>
+            {% endif %}
+
+            {% if non_updates %}
+                <div class="section">
+                    <h3>❌ 누락 대상</h3>
+                    {% for non_update in non_updates %}
+                        <div class="non-update">{{ non_update[0] }}</div>
+                    {% endfor %}
+                    <p class="message">※ 훈련 연기 가능 횟수 소진으로 업데이트가 누락되었습니다!</p>
+                </div>
             {% endif %}
 
             {% if results %}

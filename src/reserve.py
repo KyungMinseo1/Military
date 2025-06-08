@@ -6,14 +6,14 @@ class Reserve:
         '''
         학번과 군번이 서로 매핑된 데이터를 가지고 있다고 가정 (이를 통해 학생정보와 군정보를 연계)  
         '''
-        self.data = []        # 예비군 데이터
-        self.s_list = s_list  # {학번 : 군번} 연계 딕셔너리
+        self.data = []                              # 예비군 데이터
+        self.s_list = s_list                        # {학번 : 군번} 연계 딕셔너리
 
     def is_available(self, x, y, z) -> int:
         '''
         군복무 가능여부를 판단하기 위한 함수  
         '''
-        return x*y*z          # 하나라도 0이면 훈련 불가 판정 내리도록 곱 연산 수행
+        return x*y*z                                # 하나라도 0이면 훈련 불가 판정 내리도록 곱 연산 수행
     
     def binary_search(self, target, start, end, find_insert_pos=False) -> Optional[Tuple[int, Any]]:
         '''
@@ -22,14 +22,14 @@ class Reserve:
         '''
         if end < start:
             if find_insert_pos:
-                return (start, None)  # 삽입 위치 반환
+                return (start, None)                # 삽입 위치 반환
             return None
-        mid = (start + end)//2          # 중간 인덱스값 구하기
-        mid_data = self.data[mid]       # 중간 인덱스에 해당되는 실제 값
-        if mid_data[0] == target:       # 찾으려는 학번과 일치한다면
+        mid = (start + end)//2                      # 중간 인덱스값 구하기
+        mid_data = self.data[mid]                   # 중간 인덱스에 해당되는 실제 값
+        if mid_data[0] == target:                   # 찾으려는 학번과 일치한다면
             if find_insert_pos:
                 return None
-            return (mid, mid_data)      # 해당 데이터와 인덱스 번호 추출
+            return (mid, mid_data)                  # 해당 데이터와 인덱스 번호 추출
         elif mid_data[0] > target:                                              # 중간 인덱스가 타겟보다 크다면    
             return self.binary_search(target, start, mid-1, find_insert_pos)    # 재귀 호출(중간 인덱스 앞앞에서 검색)
         elif mid_data[0] < target:                                              # 중간 인덱스가 타겟보다 작다면
@@ -65,8 +65,8 @@ class Reserve:
             reserve_year = current_year - out_year  # 예비군 복무연차 계산 (현재년도 - 전역년도)
             temp_data.append(reserve_year)          # 예비군 복무연차 추가
 
-            temp_data.append(0)                     # 예비군 훈련 횟수(처음 생성 시 0으로 초기화)
-            temp_data.append(0)                     # 예비군 훈련 시간(처음 생성 시 0으로 초기화)
+            temp_data.append(reserve_year)          # 예비군 훈련 횟수(처음 생성 시 복무연차와 동일하게 초기화)
+            temp_data.append(8*reserve_year)        # 예비군 훈련 시간(처음 생성 시 복무연차*8(기본시간)로 초기화)
             temp_data.append(6)                     # 훈련 연기 가능 횟수(처음 생성 시 6으로 초기화)
             temp_data.append(0)                     # 조기 퇴소 횟수(처음 생성 시 0으로 초기화)
 
@@ -114,16 +114,22 @@ class Reserve:
        
         return [temp_data]
 
-    def retrieve(self, value = None, is_filter = False) -> Optional[List]:
+    def retrieve(self, value = None, is_filter = False, is_early = False) -> Optional[List]:
         '''
         데이터를 검색하기 위한 함수\n
         is_filter가 True이면 이번학기에 예비군 훈련이 가능한 학생 필터링\n
-        is_filter가 False이면 학번으로 특정 학생의 예비군 정보 검색  
+        is_early가 True 이면 조기퇴소한 대상 필터링\n
+        둘 다 False이면 특정 학생 검색
         '''
         found_data = []                         # 검색된 값 반환을 위한 리스트
         if is_filter:                           # 필터링 적용 검색
             for data in self.data:              # 저장된 데이터 전부 순회
                 if data[3] == 1:                # 훈련대상여부가 참이라면
+                    found_data.append(data)     # 검색 리스트에 추가
+        elif is_early:                            # 조기퇴소 대상 검색
+            for data in self.data:              # 저장된 데이터 전부 순회
+                if data[-1] != 0:               # 조기퇴소횟수가 0 이상이라면
+                    data.append(data[5] * 8 - data[6])  # 조기퇴소로 부족한 훈련시간 계산 (예비군훈련횟수 * 8 - 실제훈련시간)
                     found_data.append(data)     # 검색 리스트에 추가
         else:                                   # 특정 학생 검색
             s_num = value                       # 검색 입력 학번 값
@@ -149,10 +155,21 @@ class Reserve:
                 continue                        # 값이 없다면 건너뛰기
             data[5] += update_data[1]           # 예비군 훈련 여부 업데이트
             data[6] += update_data[2]           # 예비군 훈련 시간 업데이트
-            data[7] -= update_data[3]           # 예비군 훈련 연기 여부 업데이트
-            data[8] += update_data[4]           # 예비군 조기퇴소 여부 업데이트
-            self.data[idx] = data               # 기존 데이터에 수정된 데이터 업데이트
-            return_data.append(data)            # 확인용 리스트에도 수정 데이터 추가
+            data[7] -= update_data[3]           # 예비군 훈련 연기 가능 횟수 업데이트
+            data[8] += update_data[4]           # 예비군 조기퇴소 횟수 업데이트
+            if data[7] > 0:                     # 예비군 훈련 연기 가능 횟수가 0 이상이면
+                self.data[idx] = data           # 기존 데이터에 수정된 데이터 업데이트
+                return_data.append(data)        # 확인용 리스트에도 수정 데이터 추가
+            elif data[7] == 0:                  # 예비군 훈련 연기 가능 횟수가 0이라면
+                self.data[idx] = data           # 기존 데이터에 수정된 데이터 업데이트
+                data = data.copy()              # 복사본 생성
+                data.append(1)                  # 경고 메시지 대상 구별을 위해 1 추가
+                return_data.append(data)        # 확인용 리스트에 수정 데이터 추가
+            elif data[7] < 0:                   # 더 이상 연기가 불가능하다면(음수라면)
+                data[7] = 0                     # 0으로 변환
+                data = data.copy()              # 복사본 생성
+                data.append(0)                  # 데이터 추가하지 않고 에러 메시지 반환을 위해 0 추가
+                return_data.append(data)        # 확인용 리스트에 수정 데이터 추가
         return return_data                      # 업데이트 확인용 리스트 반환
 
     def update_is_available(self, student_data : dict) -> Optional[List]:
