@@ -184,5 +184,5 @@ def print_():
     return render_template('print.html', results=data)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
 
