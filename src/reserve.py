@@ -99,8 +99,8 @@ class Reserve:
         reserve_year = current_year - out_year  # 예비군 복무연차 계산 (현재년도 - 전역년도)
         temp_data.append(reserve_year)          # 예비군 복무연차 추가
 
-        temp_data.append(0)                     # 예비군 훈련 횟수(처음 생성 시 0으로 초기화)
-        temp_data.append(0)                     # 예비군 훈련 시간(처음 생성 시 0으로 초기화)
+        temp_data.append(reserve_year)          # 예비군 훈련 횟수(처음 생성 시 복무연차와 동일하게 초기화)
+        temp_data.append(8*reserve_year)        # 예비군 훈련 시간(처음 생성 시 복무연차*8(기본시간)로 초기화)
         temp_data.append(6)                     # 훈련 연기 가능 횟수(처음 생성 시 6으로 초기화)
         temp_data.append(0)                     # 조기 퇴소 횟수(처음 생성 시 0으로 초기화)
 
